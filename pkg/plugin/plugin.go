@@ -9,7 +9,6 @@ type EigenRuntimePlugin interface {
 	Version() string
 	DescribeCommands() []*cli.Command
 	GetCommands() []*cli.Command
-	RegistrationCommands() []*cli.Command
 	RunCommands() []*cli.Command
 	RemoveCommands() []*cli.Command
 }
