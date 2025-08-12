@@ -1,5 +1,7 @@
 package runtime
 
+import "github.com/Layr-Labs/eigenruntime-go/pkg/common"
+
 // EigenRuntime defines the interface that all AVS runtime implementations must satisfy.
 // Runtimes are loaded dynamically and orchestrate the deployment and lifecycle of AVS components.
 type EigenRuntime interface {
@@ -9,20 +11,13 @@ type EigenRuntime interface {
 	// Kind returns the type of AVS architecture this runtime manages (e.g., "Hourglass")
 	Kind() string
 
-	// Validate checks if the provided spec is valid for this runtime.
-	// This should verify structure, required fields, and constraints.
-	Validate(ctx Context, spec map[string]interface{}) error
-
-	// Deploy deploys the AVS components based on the provided spec.
+	// Run runs the AVS components based on the provided spec.
 	// This should be idempotent and handle partial failures gracefully.
-	Deploy(spec map[string]interface{}) error
+	Run(spec common.RuntimeSpec) error
 
 	// Remove removes the AVS components based on the provided spec.
 	// This should gracefully handle component removal and cleanup.
-	Remove(spec map[string]interface{}) error
-
-	// Stop gracefully terminates all components managed by this runtime.
-	Stop(ctx Context) error
+	Remove(spec common.RuntimeSpec) error
 }
 
 // Context provides runtime execution context including AVS metadata and Docker configuration.

@@ -14,7 +14,6 @@ help:
 	@echo "  make install    - Install the package"
 	@echo "  make push       - Build and run push example"
 	@echo "  make pull       - Build and run pull example"
-	@echo "  make validate   - Validate test-spec.yaml"
 	@echo "  make examples   - Build example binaries"
 	@echo "  make all        - Run fmt, lint, build, and test"
 
@@ -92,50 +91,6 @@ pull: bin/pull
 	@echo ""
 	@echo "Example:"
 	@echo "  bin/pull -ref ghcr.io/myorg/myartifact:latest -output spec.yaml"
-
-# Validate test spec
-validate:
-	@echo "Validating test-spec.yaml..."
-	@go run cmd/validate/main.go test-spec.yaml || (echo "Creating validator..." && make validate-tool)
-
-# Create validation tool
-validate-tool:
-	@mkdir -p cmd/validate
-	@cat > cmd/validate/main.go << 'EOF'
-	package main
-	
-	import (
-		"fmt"
-		"log"
-		"os"
-		
-		"github.com/Layr-Labs/eigenruntime-go/pkg/spec"
-	)
-	
-	func main() {
-		if len(os.Args) < 2 {
-			log.Fatal("Usage: validate <spec-file>")
-		}
-		
-		data, err := os.ReadFile(os.Args[1])
-		if err != nil {
-			log.Fatalf("Failed to read file: %v", err)
-		}
-		
-		s, err := spec.ParseYAML(data)
-		if err != nil {
-			log.Fatalf("Failed to parse YAML: %v", err)
-		}
-		
-		if err := spec.ValidateRuntimeSpec(s); err != nil {
-			log.Fatalf("Validation failed: %v", err)
-		}
-		
-		fmt.Printf("✓ %s is valid\n", os.Args[1])
-	}
-	EOF
-	@go run cmd/validate/main.go test-spec.yaml
-	@echo "✓ Validation tool created and spec validated"
 
 # Development targets
 .PHONY: dev watch
