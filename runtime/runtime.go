@@ -15,9 +15,9 @@ type EigenRuntime interface {
 	// This should be idempotent and handle partial failures gracefully.
 	Run(spec common.RuntimeSpec) error
 
-	// Remove removes the AVS components based on the provided spec.
+	// Remove removes the AVS components based on the provided resource ID.
 	// This should gracefully handle component removal and cleanup.
-	Remove(spec common.RuntimeSpec) error
+	Remove(resourceID string) error
 }
 
 // Context provides runtime execution context including AVS metadata and Docker configuration.
