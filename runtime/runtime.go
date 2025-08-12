@@ -13,9 +13,13 @@ type EigenRuntime interface {
 	// This should verify structure, required fields, and constraints.
 	Validate(ctx Context, spec map[string]interface{}) error
 
-	// Reconcile converges actual state with desired state based on the spec.
+	// Deploy deploys the AVS components based on the provided spec.
 	// This should be idempotent and handle partial failures gracefully.
-	Reconcile(spec map[string]interface{}) error
+	Deploy(spec map[string]interface{}) error
+
+	// Remove removes the AVS components based on the provided spec.
+	// This should gracefully handle component removal and cleanup.
+	Remove(spec map[string]interface{}) error
 
 	// Stop gracefully terminates all components managed by this runtime.
 	Stop(ctx Context) error

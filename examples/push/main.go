@@ -8,7 +8,6 @@ import (
 	"os"
 
 	"github.com/Layr-Labs/eigenruntime-go/pkg/artifact"
-	"github.com/Layr-Labs/eigenruntime-go/pkg/manifest"
 )
 
 func main() {
@@ -31,14 +30,12 @@ func main() {
 		log.Fatalf("Failed to read spec file: %v", err)
 	}
 
-	builder := artifact.NewBuilder()
-	
 	reference := fmt.Sprintf("%s:%s", *registry, *tag)
 	
-	digest, err := builder.BuildAndPush(
+	digest, err := artifact.BuildAndPush(
 		context.Background(),
 		specContent,
-		manifest.BuildOptions{
+		artifact.BuildOptions{
 			Description: *description,
 			Source:      *source,
 		},

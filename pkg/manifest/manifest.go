@@ -1,28 +1,14 @@
 package manifest
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"time"
 
+	"github.com/Layr-Labs/eigenruntime-go/pkg/artifact"
+	"github.com/Layr-Labs/eigenruntime-go/pkg/common"
 	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
-)
-
-const (
-	MediaTypeEigenRuntimeManifest       = "application/vnd.eigenruntime.manifest.v1"
-	MediaTypeEigenRuntimeConfig         = "application/vnd.eigenruntime.manifest.config.v1+json"
-	MediaTypeYAML                       = "text/yaml"
-	MediaTypeOCIManifest               = "application/vnd.oci.image.manifest.v1+json"
-	
-	AnnotationSpecVersion     = "io.eigenruntime.spec.version"
-	AnnotationImageCreated    = "org.opencontainers.image.created"
-	AnnotationImageDescription = "org.opencontainers.image.description"
-	AnnotationImageSource     = "org.opencontainers.image.source"
-	
-	DefaultSpecVersion = "v1"
 )
 
 type BuildOptions struct {
@@ -42,9 +28,13 @@ type Manifest struct {
 	Annotations   map[string]string      `json:"annotations,omitempty"`
 }
 
-func computeDigest(content []byte) string {
-	hash := sha256.Sum256(content)
-	return fmt.Sprintf("sha256:%s", hex.EncodeToString(hash[:]))
+func CreateMinimalConfig() []byte {
+	config := map[string]interface{}{
+		"created": time.Now().Format(time.RFC3339),
+	}
+	
+	data, _ := json.Marshal(config)
+	return data
 }
 
 func CreateManifest(specContent []byte, config []byte, opts BuildOptions) (*Manifest, error) {
@@ -57,37 +47,37 @@ func CreateManifest(specContent []byte, config []byte, opts BuildOptions) (*Mani
 		createdTime = *opts.CreatedTime
 	}
 	
-	version := DefaultSpecVersion
+	version := common.DefaultSpecVersion
 	if opts.Version != "" {
 		version = opts.Version
 	}
 	
-	opts.Annotations[AnnotationSpecVersion] = version
-	opts.Annotations[AnnotationImageCreated] = createdTime.Format(time.RFC3339)
+	opts.Annotations[common.AnnotationSpecVersion] = version
+	opts.Annotations[common.AnnotationImageCreated] = createdTime.Format(time.RFC3339)
 	
 	if opts.Description != "" {
-		opts.Annotations[AnnotationImageDescription] = opts.Description
+		opts.Annotations[common.AnnotationImageDescription] = opts.Description
 	}
 	
 	if opts.Source != "" {
-		opts.Annotations[AnnotationImageSource] = opts.Source
+		opts.Annotations[common.AnnotationImageSource] = opts.Source
 	}
 
-	specDigest := computeDigest(specContent)
-	configDigest := computeDigest(config)
+	specDigest := artifact.ComputeDigest(specContent)
+	configDigest := artifact.ComputeDigest(config)
 	
 	manifest := &Manifest{
 		SchemaVersion: 2,
-		MediaType:     MediaTypeOCIManifest,
-		ArtifactType:  MediaTypeEigenRuntimeManifest,
+		MediaType:     common.MediaTypeOCIManifest,
+		ArtifactType:  common.MediaTypeEigenRuntimeManifest,
 		Config: ocispec.Descriptor{
-			MediaType: MediaTypeEigenRuntimeConfig,
+			MediaType: common.MediaTypeEigenRuntimeConfig,
 			Digest:    digest.Digest(configDigest),
 			Size:      int64(len(config)),
 		},
 		Layers: []ocispec.Descriptor{
 			{
-				MediaType: MediaTypeYAML,
+				MediaType: common.MediaTypeYAML,
 				Digest:    digest.Digest(specDigest),
 				Size:      int64(len(specContent)),
 			},

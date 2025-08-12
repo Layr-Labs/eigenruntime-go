@@ -6,15 +6,10 @@ spec:
   performer:
     registry: ghcr.io/example/performer
     digest: sha256:abc123
-    command: ["performer", "run"]
     env:
-      ENV_VAR: "value"
-    resources:
-      tee_enabled: true
-  aggregator:
-    registry: ghcr.io/example/aggregator
-    digest: sha256:def456
-  dependencies:
-    executor:
-      registry: ghcr.io/example/executor
-      digest: sha256:ghi789
+      - name: "env_var"
+        type: "secret"
+        required: true
+  executor:
+    registry: ghcr.io/example/executor
+    digest: sha256:ghi789
